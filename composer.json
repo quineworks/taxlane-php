@@ -6,7 +6,7 @@
     "homepage": "https://taxlane.ng/developers",
     "support": {
         "issues": "https://github.com/quineworks/tax-lane/issues",
-        "source": "https://github.com/quineworks/tax-lane"
+        "source": "https://github.com/quineworks/taxlane-php"
     },
     "require": {
         "php": ">=8.0",

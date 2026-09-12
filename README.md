@@ -25,21 +25,6 @@ why.
 composer require quineworks/taxlane
 ```
 
-If this package hasn't been published to Packagist yet (see
-[Distribution](#distribution) below): unlike npm/pip, Composer has no
-built-in "install from a subdirectory of a git repo" — a `vcs`-type
-repository only looks for `composer.json` at the target repo's root, and
-this package's lives at `sdk-php/composer.json`, not `tax-lane/composer.json`
-(this monorepo has no root `composer.json` of its own — the app itself is a
-Node/Vite project). Clone this repo and point Composer's `path` repository
-type at the subdirectory instead:
-
-```sh
-git clone https://github.com/quineworks/tax-lane.git ../tax-lane
-composer config repositories.taxlane path ../tax-lane/sdk-php
-composer require quineworks/taxlane:@dev
-```
-
 ## Quickstart
 
 ```php
@@ -235,11 +220,16 @@ there's no rate limit to work around on a per-caller basis.
 
 ## Distribution
 
-Published to [Packagist](https://packagist.org) as `quineworks/taxlane`,
-when a fleet Packagist publisher account exists to publish it under. Until
-then, install directly from this repo's `sdk-php/` subdirectory via a local
-`path` repository — see [Install](#install) above.
+Published to [Packagist](https://packagist.org/packages/quineworks/taxlane)
+as `quineworks/taxlane`. This README's source of truth is
+`quineworks/tax-lane`'s `sdk-php/` directory — the code here in
+[`quineworks/taxlane-php`](https://github.com/quineworks/taxlane-php) is a
+public mirror, kept in sync by that repo's `sdk-php-publish` CI workflow on
+every tagged release, so that Packagist (which needs anonymous access to a
+public VCS repo, and can't index a subdirectory of a larger repo) has
+something to actually publish. Don't edit this copy directly — the next
+sync will overwrite it.
 
 ## License
 
-MIT — see the repo root [`LICENSE`](../LICENSE).
+MIT — see [`LICENSE`](LICENSE).

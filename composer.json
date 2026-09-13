@@ -4,6 +4,20 @@
     "type": "library",
     "license": "MIT",
     "homepage": "https://taxlane.ng/developers",
+    "keywords": [
+        "nigeria",
+        "tax",
+        "paye",
+        "payroll",
+        "vat",
+        "withholding-tax",
+        "cit",
+        "cgt",
+        "stamp-duty",
+        "import-duty",
+        "tax-calculator",
+        "sdk"
+    ],
     "support": {
         "issues": "https://github.com/quineworks/tax-lane/issues",
         "source": "https://github.com/quineworks/taxlane-php"

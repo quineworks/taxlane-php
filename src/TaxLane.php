@@ -18,11 +18,13 @@ namespace TaxLane;
  *
  * Every method takes the request body as a single associative array (the
  * real camelCase JSON keys, no snake_case translation layer) plus an
- * optional trailing $baseUrl, and returns the parsed JSON response as a
- * plain associative array -- not a generated class/DTO, since PHP has no
- * structural-typing import across a package boundary to generate one from
- * without a second schema to drift from. Each method's docblock documents
- * the response's top-level keys, sourced from developersContent.tsx's
+ * optional trailing $baseUrl, and returns
+ * ['data' => <parsed JSON response>, 'rateLimit' => ['limit' => int,
+ * 'remaining' => int, 'reset' => int]] -- 'data' is a plain associative
+ * array, not a generated class/DTO, since PHP has no structural-typing
+ * import across a package boundary to generate one from without a second
+ * schema to drift from (tax-lane#1889). Each method's docblock documents
+ * 'data''s top-level keys, sourced from developersContent.tsx's
  * *_RESPONSE examples.
  *
  * Unknown/misspelled request keys are passed straight through to the API
@@ -50,8 +52,9 @@ final class TaxLane
      *     `secondaryAnnualIncome`, `annualRentPaid`, `terminationBenefit`,
      *     `pensionContribution`, `nhfContribution`, `nhisContribution`,
      *     `lifeAssurancePremiumContribution`.
-     * @return array<string, mixed> `taxableIncome`, `payeTax`, `annualTax`,
-     *     `monthlyTax`, a `reliefs` breakdown, and a `bandBreakdown` array.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `taxableIncome`, `payeTax`, `annualTax`, `monthlyTax`,
+     *     a `reliefs` breakdown, and a `bandBreakdown` array.
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculatePaye(array $input, ?string $baseUrl = null): array
@@ -67,7 +70,7 @@ final class TaxLane
      * there is no partial-success mode.
      *
      * @param array{employees: array<int, array<string, mixed>>} $input
-     * @return array{results: array<int, array<string, mixed>>}
+     * @return array{data: array{results: array<int, array<string, mixed>>}, rateLimit: array{limit: int, remaining: int, reset: int}}
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculatePayrollBatch(array $input, ?string $baseUrl = null): array
@@ -81,7 +84,8 @@ final class TaxLane
      *
      * @param array<string, mixed> $input `amount`, `mode`
      *     ("exclusive"|"inclusive"), `zeroRated`.
-     * @return array<string, mixed> `net`, `vat`, `gross`.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `net`, `vat`, `gross`.
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculateVat(array $input, ?string $baseUrl = null): array
@@ -94,8 +98,9 @@ final class TaxLane
      * does. `turnover` is the only field.
      *
      * @param array<string, mixed> $input `turnover`.
-     * @return array<string, mixed> `turnover`, `taxOwed`, `belowFloor`,
-     *     `monthlySetAside`, `turnoverToFloor`.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `turnover`, `taxOwed`, `belowFloor`, `monthlySetAside`,
+     *     `turnoverToFloor`.
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculatePresumptive(array $input, ?string $baseUrl = null): array
@@ -111,8 +116,9 @@ final class TaxLane
      *
      * @param array<string, mixed> $input `turnover`, `allowableExpenses`,
      *     `qualifyingCapitalExpenditure`, `capitalAllowanceAssetClass`.
-     * @return array<string, mixed> `turnover`, `allowableExpenses`,
-     *     `capitalAllowance`, `taxableProfit`, `taxOwed`, `effectiveRate`.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `turnover`, `allowableExpenses`, `capitalAllowance`,
+     *     `taxableProfit`, `taxOwed`, `effectiveRate`.
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculateDirectAssessment(array $input, ?string $baseUrl = null): array
@@ -128,7 +134,8 @@ final class TaxLane
      *
      * @param array<string, mixed> $input `turnover`, `fixedAssets`,
      *     `isProfessionalServices`, `taxableProfit`, `assessableProfit`.
-     * @return array<string, mixed> `eligibility` always; `standardRate` and
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `eligibility` always; `standardRate` and
      *     `developmentLevy` only when their triggering field was sent.
      * @throws TaxLaneApiException on a non-200 response.
      */
@@ -144,8 +151,9 @@ final class TaxLane
      *
      * @param array<string, mixed> $input `transactionType`, `amount`,
      *     `mode` ("gross"|"net").
-     * @return array<string, mixed> `transactionType`, `mode`, `amount`,
-     *     `rate`, `gross`, `withheld`, `net`.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `transactionType`, `mode`, `amount`, `rate`, `gross`,
+     *     `withheld`, `net`.
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculateWht(array $input, ?string $baseUrl = null): array
@@ -161,10 +169,11 @@ final class TaxLane
      * @param array<string, mixed> $input `annualBasicSalary`,
      *     `annualHousingAllowance`, `annualTransportAllowance`,
      *     `annualOtherAllowances`, `annualRentPaid`.
-     * @return array<string, mixed> `annualGrossPay`, `pensionablePay`, the
-     *     four statutory employer contributions,
-     *     `totalStatutoryEmployerCost`, and a nested `employeePaye` object
-     *     (the same shape calculatePaye() returns, informational only).
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `annualGrossPay`, `pensionablePay`, the four statutory
+     *     employer contributions, `totalStatutoryEmployerCost`, and a
+     *     nested `employeePaye` object (the same shape calculatePaye()'s
+     *     `data` returns, informational only).
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculateEmployerCost(array $input, ?string $baseUrl = null): array
@@ -184,10 +193,10 @@ final class TaxLane
      *     `isFullyReinvestedInNigerianShares`,
      *     `isRegulatedSecuritiesLendingTransfer`, `digitalAssetCategory`,
      *     `otherAnnualTaxableIncome`, `isSmallCompany`.
-     * @return array<string, mixed> `chargeableGain`, `exempt`,
-     *     `exemptReason` (only when exempt), `cgtLiability`, and
-     *     `vaWithholdingEstimate` (digital assets only, categories with a
-     *     1% disposal withholding).
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `chargeableGain`, `exempt`, `exemptReason` (only when
+     *     exempt), `cgtLiability`, and `vaWithholdingEstimate` (digital
+     *     assets only, categories with a 1% disposal withholding).
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculateCgt(array $input, ?string $baseUrl = null): array
@@ -199,8 +208,9 @@ final class TaxLane
      * Calculates Stamp Duty exactly the way POST /v1/stamp-duty does.
      *
      * @param array<string, mixed> $input `instrumentType`, `amount`.
-     * @return array<string, mixed> `instrumentType`, `amount`, `rate`
-     *     (null for the two fixed-fee instrument types), `duty`, `exempt`.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `instrumentType`, `amount`, `rate` (null for the two
+     *     fixed-fee instrument types), `duty`, `exempt`.
      * @throws TaxLaneApiException on a non-200 response.
      */
     public static function calculateStampDuty(array $input, ?string $baseUrl = null): array
@@ -215,8 +225,9 @@ final class TaxLane
      *
      * @param array<string, mixed> $input `fob`, `freight`, `insurance`,
      *     `band`, `customDutyRatePercent`.
-     * @return array<string, mixed> `fob`, `freight`, `insurance`, `cif`,
-     *     `band`, `dutyRate`, `duty`, `surcharge`, `etls`, `fcs`, `vat`,
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `fob`, `freight`, `insurance`, `cif`, `band`,
+     *     `dutyRate`, `duty`, `surcharge`, `etls`, `fcs`, `vat`,
      *     `totalLandedCost`.
      * @throws TaxLaneApiException on a non-200 response.
      */
@@ -232,12 +243,15 @@ final class TaxLane
      * wrapped.
      *
      * @param array<string, mixed> $body
-     * @return array<string, mixed>
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
      */
     private static function post(string $path, array $body, ?string $baseUrl): array
     {
         $url = ($baseUrl ?? self::API_BASE_URL) . $path;
         $json = json_encode($body, JSON_THROW_ON_ERROR);
+
+        /** @var array<string, string> $responseHeaders keyed by lowercase header name */
+        $responseHeaders = [];
 
         // curl_* below are called unqualified so tests/CurlStub.php can
         // shadow them for this namespace only -- PHP resolves an
@@ -250,6 +264,18 @@ final class TaxLane
             \CURLOPT_POSTFIELDS => $json,
             \CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
             \CURLOPT_RETURNTRANSFER => true,
+            // Captured over CURLOPT_HEADER + CURLINFO_HEADER_SIZE splitting
+            // since curl invokes this once per header line regardless of
+            // casing on the wire -- lowercase the name here so lookups
+            // below don't have to care that the Lambda/Gateway sends
+            // `X-RateLimit-*` while curl could hand back any case.
+            \CURLOPT_HEADERFUNCTION => static function ($ch, string $header) use (&$responseHeaders): int {
+                $parts = explode(':', $header, 2);
+                if (count($parts) === 2) {
+                    $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+                }
+                return strlen($header);
+            },
         ]);
 
         $responseBody = curl_exec($ch);
@@ -269,9 +295,21 @@ final class TaxLane
             $message = (is_array($decoded) && isset($decoded['error']))
                 ? (string) $decoded['error']
                 : (string) $responseBody;
-            throw new TaxLaneApiException($message, $status);
+            // Only the Lambda's own 429 sets this (`Retry-After: 1`, see
+            // PR#1886) -- every other non-200 response has no such header.
+            $retryAfter = isset($responseHeaders['retry-after']) ? (int) $responseHeaders['retry-after'] : null;
+            throw new TaxLaneApiException($message, $status, $retryAfter);
         }
 
-        return is_array($decoded) ? $decoded : [];
+        // The three X-RateLimit-* headers are always present, on every
+        // 200/400/404 response, per tax-lane#1884 -- no defaulting needed.
+        return [
+            'data' => is_array($decoded) ? $decoded : [],
+            'rateLimit' => [
+                'limit' => (int) $responseHeaders['x-ratelimit-limit'],
+                'remaining' => (int) $responseHeaders['x-ratelimit-remaining'],
+                'reset' => (int) $responseHeaders['x-ratelimit-reset'],
+            ],
+        ];
     }
 }

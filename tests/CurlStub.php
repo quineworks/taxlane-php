@@ -24,15 +24,31 @@ namespace TaxLane;
  */
 final class CurlStub
 {
-    /** @var array{status: int, body: string}|null */
+    /** @var array{status: int, body: string, headers: array<string, string>}|null */
     private static ?array $response = null;
     private static ?string $error = null;
     /** @var array{url: string, body: string}|null */
     private static ?array $request = null;
+    /** @var callable|null */
+    private static $headerFunction = null;
 
-    public static function respond(int $status, string $body): void
+    /**
+     * @param array<string, string> $headers defaults to the three
+     *     X-RateLimit-* headers always present in production (tax-lane#1884)
+     *     so tests not exercising rate-limit parsing don't have to set them;
+     *     pass an override to test parsing itself.
+     */
+    public static function respond(int $status, string $body, array $headers = []): void
     {
-        self::$response = ['status' => $status, 'body' => $body];
+        self::$response = [
+            'status' => $status,
+            'body' => $body,
+            'headers' => array_merge([
+                'X-RateLimit-Limit' => '50',
+                'X-RateLimit-Remaining' => '49',
+                'X-RateLimit-Reset' => '1757750400',
+            ], $headers),
+        ];
         self::$error = null;
     }
 
@@ -53,12 +69,25 @@ final class CurlStub
         self::$response = null;
         self::$error = null;
         self::$request = null;
+        self::$headerFunction = null;
     }
 
     /** @internal used by the curl_* stub functions below */
     public static function recordRequest(string $url, string $body): void
     {
         self::$request = ['url' => $url, 'body' => $body];
+    }
+
+    /** @internal used by the curl_* stub functions below */
+    public static function setHeaderFunction(?callable $fn): void
+    {
+        self::$headerFunction = $fn;
+    }
+
+    /** @internal used by the curl_* stub functions below */
+    public static function headerFunction(): ?callable
+    {
+        return self::$headerFunction;
     }
 
     /** @internal used by the curl_* stub functions below */
@@ -87,6 +116,9 @@ function curl_setopt_array($ch, array $options): bool
     if ($request !== null && array_key_exists(\CURLOPT_POSTFIELDS, $options)) {
         CurlStub::recordRequest($request['url'], (string) $options[\CURLOPT_POSTFIELDS]);
     }
+    if (array_key_exists(\CURLOPT_HEADERFUNCTION, $options)) {
+        CurlStub::setHeaderFunction($options[\CURLOPT_HEADERFUNCTION]);
+    }
     return true;
 }
 
@@ -95,6 +127,14 @@ function curl_exec($ch)
     if (CurlStub::pendingError() !== null) {
         return false;
     }
+
+    $headerFunction = CurlStub::headerFunction();
+    if ($headerFunction !== null) {
+        foreach (CurlStub::pendingResponse()['headers'] ?? [] as $name => $value) {
+            $headerFunction($ch, "{$name}: {$value}\r\n");
+        }
+    }
+
     return CurlStub::pendingResponse()['body'] ?? '';
 }
 

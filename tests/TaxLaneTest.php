@@ -97,12 +97,48 @@ final class TaxLaneTest extends TestCase
     }
 
     /** @dataProvider endpoints */
-    public function testResolvesWithTheParsedJsonBodyOnA200Response(string $method, string $path, array $input): void
-    {
+    public function testResolvesWithDataWrappingTheParsedJsonBodyOnA200Response(
+        string $method,
+        string $path,
+        array $input,
+    ): void {
         $body = ['taxableIncome' => 6_000_000, 'payeTax' => 870_000];
         CurlStub::respond(200, json_encode($body));
 
-        $this->assertSame($body, call_user_func([TaxLane::class, $method], $input));
+        $response = call_user_func([TaxLane::class, $method], $input);
+
+        $this->assertSame($body, $response['data']);
+        $this->assertSame(['limit' => 50, 'remaining' => 49, 'reset' => 1_757_750_400], $response['rateLimit']);
+    }
+
+    /** @dataProvider endpoints */
+    public function testParsesTheRateLimitHeadersOffTheTwoHundredResponse(
+        string $method,
+        string $path,
+        array $input,
+    ): void {
+        CurlStub::respond(200, '{}', [
+            'X-RateLimit-Limit' => '50',
+            'X-RateLimit-Remaining' => '12',
+            'X-RateLimit-Reset' => '1757750461',
+        ]);
+
+        $response = call_user_func([TaxLane::class, $method], $input);
+
+        $this->assertSame(['limit' => 50, 'remaining' => 12, 'reset' => 1_757_750_461], $response['rateLimit']);
+    }
+
+    public function testParsesTheRateLimitHeadersCaseInsensitively(): void
+    {
+        CurlStub::respond(200, '{}', [
+            'x-ratelimit-limit' => '50',
+            'X-Ratelimit-Remaining' => '7',
+            'X-RATELIMIT-RESET' => '1757750500',
+        ]);
+
+        $response = TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000]);
+
+        $this->assertSame(['limit' => 50, 'remaining' => 7, 'reset' => 1_757_750_500], $response['rateLimit']);
     }
 
     /** @dataProvider endpoints */
@@ -119,6 +155,20 @@ final class TaxLaneTest extends TestCase
         } catch (TaxLaneApiException $exception) {
             $this->assertSame('grossAnnualIncome is required and must be a number', $exception->getMessage());
             $this->assertSame(400, $exception->getCode());
+            $this->assertNull($exception->getRetryAfter());
+        }
+    }
+
+    public function testPopulatesRetryAfterFromTheHeaderOnA429Response(): void
+    {
+        CurlStub::respond(429, json_encode(['error' => 'Too Many Requests']), ['Retry-After' => '1']);
+
+        try {
+            TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000]);
+            $this->fail('Expected TaxLaneApiException to be thrown.');
+        } catch (TaxLaneApiException $exception) {
+            $this->assertSame(429, $exception->getCode());
+            $this->assertSame(1, $exception->getRetryAfter());
         }
     }
 

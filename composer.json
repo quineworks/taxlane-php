@@ -19,7 +19,7 @@
         "sdk"
     ],
     "support": {
-        "issues": "https://github.com/quineworks/tax-lane/issues",
+        "issues": "https://github.com/quineworks/taxlane-php/issues",
         "source": "https://github.com/quineworks/taxlane-php"
     },
     "require": {

@@ -1,9 +1,18 @@
 # quineworks/taxlane
 
-Official PHP SDK for [TaxLane](https://taxlane.ng)'s free
-[Developer API](https://taxlane.ng/developers) — PAYE, VAT, Withholding Tax,
-Companies Income Tax, Capital Gains Tax, and 6 more Nigeria tax calculators,
-as static method calls instead of hand-written `curl`.
+[![Latest Stable Version](https://img.shields.io/packagist/v/quineworks/taxlane.svg)](https://packagist.org/packages/quineworks/taxlane)
+[![PHP Version Require](https://img.shields.io/packagist/php-v/quineworks/taxlane.svg)](composer.json)
+[![License](https://img.shields.io/packagist/l/quineworks/taxlane.svg)](LICENSE)
+
+Nigeria PAYE, VAT, CIT, CGT & 6 more tax calculators, as static PHP method
+calls — no API key, no Guzzle, no account.
+
+```php
+use TaxLane\TaxLane;
+
+TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000])['data'];
+// ['taxableIncome' => 6000000, 'payeTax' => 870000, 'monthlyTax' => 72500, ...]
+```
 
 - **Zero Composer dependencies** — only the `ext-curl` PHP extension, which
   ships with essentially every PHP install (shared hosting, Laravel

@@ -1,6 +1,7 @@
 # quineworks/taxlane
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/quineworks/taxlane.svg)](https://packagist.org/packages/quineworks/taxlane)
+[![Total Downloads](https://img.shields.io/packagist/dt/quineworks/taxlane.svg)](https://packagist.org/packages/quineworks/taxlane)
 [![PHP Version Require](https://img.shields.io/packagist/php-v/quineworks/taxlane.svg)](composer.json)
 [![License](https://img.shields.io/packagist/l/quineworks/taxlane.svg)](LICENSE)
 

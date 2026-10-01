@@ -116,8 +116,16 @@ jobs:
           const UI_FILE_RE = /(^|\/)(src|app)\/.*\.(tsx|ts|jsx|js|vue|svelte)$/i;
           const EXCLUDE_RE = /(^|\/)(__tests__|__mocks__)\/|\.(test|spec|stories)\.[^/]+$/i;
 
+          // Exact-path allowlist for files confirmed (tax-lane#965, tax-lane#2492) to be
+          // pure, hook-free, router-free typed data arrays with no rendered markup.
+          // Deliberately an exact-path list, not a directory-wide exclude — see
+          // platform#3220.
+          const CONTENT_DATA_ALLOWLIST = new Set([
+            'web/src/lib/content/changelogEntries.ts',
+          ]);
+
           const uiTouchingFiles = changedFiles.filter(
-            (f) => UI_FILE_RE.test(f) && !EXCLUDE_RE.test(f)
+            (f) => UI_FILE_RE.test(f) && !EXCLUDE_RE.test(f) && !CONTENT_DATA_ALLOWLIST.has(f)
           );
 
           if (uiTouchingFiles.length === 0) {

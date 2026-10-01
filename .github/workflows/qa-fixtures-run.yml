@@ -65,6 +65,19 @@
 # generic (no tax-lane-specific path) so any future product's own resolver
 # script gets picked up the same way, and a repo with no such script (or no
 # `expectedFormula`/`expectedRange` at all) is completely unaffected.
+#
+# 2026-09-28 (tax-lane#2397 review): tax-lane's resolver grew a third
+# extension (`selectorTemplate`, tax-lane#2395) that reads a *third* source
+# file (`web/src/lib/content/coverageChips.tsx`) this job never fetches --
+# same ENOENT-via-`__dirname` gap #1148 was fixed for above, just for a file
+# the resolver reads directly off disk instead of one this workflow passes
+# it. Rather than hardcoding that (or any future) source path here -- which
+# would break the "generic, no tax-lane-specific path" property above --
+# the resolve step now just exports `REPO` (`GH_TOKEN` was already in the
+# job env from the "Fetch cross-repo GitHub token" step), so a resolver
+# that needs to read a source file with no full checkout available can
+# fetch it itself via the Contents API, the same way this workflow's own
+# discover step does. A resolver with no such need is unaffected.
 name: qa-fixtures-run
 
 on:
@@ -263,6 +276,15 @@ jobs:
 
       - name: Resolve qa/fixtures.json's expectedFormula/expectedRange, if this repo defines a resolver
         if: steps.discover.outputs.found == 'true' && steps.discover.outputs.resolver == 'true'
+        env:
+          # Lets a repo's resolver fetch other source files it needs via the
+          # Contents API (same pattern this step's own discover step already
+          # uses) instead of assuming a full checkout -- this job only ever
+          # checks out platform's agent/ tree, never the target repo's own
+          # source (tax-lane#2397). GH_TOKEN is already in the job env from
+          # the earlier "Fetch cross-repo GitHub token" step; a resolver with
+          # no such need (or no REPO/GH_TOKEN use at all) is unaffected.
+          REPO: ${{ github.repository }}
         run: node /tmp/resolve-qa-fixtures.cjs /tmp/fixtures.json /tmp/fixtures.json
 
       - name: Run render-interact against qa/fixtures.json

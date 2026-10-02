@@ -3,12 +3,11 @@
 // platform#3253: a self-healing backstop for the `tracking-parent-hold`
 // bypass pattern that has now recurred three times (#1121, tax-lane#820/
 // #838, tax-lane#2547) — an agent closes a held tracking parent directly
-// (not via `tracking-parent-auto-closer.yml`), sometimes stripping the hold
-// label in the same action, even immediately after the same agent run
-// flagged an unmet DoD gap. `manager.md`/`reviewer.md` already carry a
-// prompt guardrail against this (#1804) but prose doesn't reliably survive
-// a long/multi-step agent run — this needs to not depend on the dispatched
-// agent remembering/following it.
+// (not via `tracking-parent-auto-closer.yml`) while the hold label is still
+// present. `manager.md`/`reviewer.md` already carry a prompt guardrail
+// against this (#1804) but prose doesn't reliably survive a long/multi-step
+// agent run — this needs to not depend on the dispatched agent
+// remembering/following it.
 //
 // Unlike `tracking-parent-auto-closer.cjs`, this guard never needs the
 // Sub-issues API: `tracking-parent-hold` is, by convention, applied
@@ -18,8 +17,21 @@
 // legitimate close — no need to independently re-derive "is this a
 // tracking parent".
 //
-// decideBypass({ events, closedAt, closedByLogin, staleWindowMs }) ->
-//   { isBypass, reason }
+// platform#3256: an earlier version of this guard also flagged a close as
+// a bypass whenever `tracking-parent-hold` had been *removed* shortly
+// before the close by the same actor, on the theory that a same-session
+// strip-then-close looked like a bypass in disguise. That heuristic was
+// built from a single misdiagnosed incident (tax-lane#2547) — in every
+// actual historical bypass (#1121, tax-lane#820/#838), the issue closed
+// *while the hold label was still attached*; none of them involved the
+// label being removed first. The guard's own posted remediation comment
+// also explicitly instructs agents to "remove tracking-parent-hold ... and
+// [let it] close", so flagging that exact path as a bypass blocked the
+// only remediation it prescribes. A removed-then-closed sequence is
+// therefore never flagged, regardless of how little time elapsed between
+// the two — only "hold still present at the moment of closing" counts.
+//
+// decideBypass({ events, closedAt, closedByLogin }) -> { isBypass, reason }
 //
 // events: the closed issue's own Issue Events
 //   (`GET /repos/{owner}/{repo}/issues/{number}/events`), each with at
@@ -35,13 +47,7 @@
 //   `github.token`, so its closes always show as `github-actions[bot]` —
 //   any other actor closing an issue that carried the hold label is, by
 //   definition, not that workflow.
-// staleWindowMs: how recently an `unlabeled(tracking-parent-hold)` event
-//   must precede the close to still count as "stripped at close time"
-//   rather than an earlier, separate, deliberate unhold. Defaults to 10
-//   minutes — generous for a single agent-run close sequence (the
-//   tax-lane#2547 incident's gap was ~1s) while not flagging an unhold
-//   left to sit for a while before an unrelated later close.
-function decideBypass({ events, closedAt, closedByLogin, staleWindowMs = 10 * 60 * 1000 }) {
+function decideBypass({ events, closedAt, closedByLogin }) {
   if (closedByLogin === 'github-actions[bot]') {
     return {
       isBypass: false,
@@ -74,21 +80,11 @@ function decideBypass({ events, closedAt, closedByLogin, staleWindowMs = 10 * 60
     };
   }
 
-  const gapMs = closedAtMs - new Date(last.created_at).getTime();
-  if (gapMs <= staleWindowMs) {
-    return {
-      isBypass: true,
-      reason: `tracking-parent-hold was stripped by ${lastActor} only ${Math.round(gapMs / 1000)}s before ` +
-        `${closedByLogin} closed this issue directly — treating a same-session label-then-close as a ` +
-        'bypass of tracking-parent-auto-closer.yml.',
-    };
-  }
-
   return {
     isBypass: false,
-    reason: `tracking-parent-hold was removed ${Math.round(gapMs / 1000)}s before close, outside the ` +
-      `${Math.round(staleWindowMs / 1000)}s stale window — looks like a deliberate, separate unhold rather ` +
-      'than a same-session bypass.',
+    reason: `tracking-parent-hold was removed by ${lastActor} at ${last.created_at}, before ${closedByLogin} ` +
+      'closed this issue — the hold was not present at close time, so this is the prescribed ' +
+      'remove-then-close remediation, not a bypass.',
   };
 }
 

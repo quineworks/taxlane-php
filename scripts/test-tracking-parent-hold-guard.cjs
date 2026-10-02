@@ -39,8 +39,11 @@ test('direct agent close with hold label still present at close time -> isBypass
   assert.match(result.reason, /present/);
 });
 
-// Mirrors the tax-lane#2547 incident: hold stripped 1 second before close.
-test('direct agent close with hold stripped 1s before close -> isBypass: true', () => {
+// platform#3256: mirrors the tax-lane#2547 incident — manager verified the
+// DoD gap was fixed, removed the hold, then closed, 1 second later in the
+// same session. This is the guard's own prescribed remediation, not a
+// bypass, regardless of how little time elapsed between the two actions.
+test('direct agent close with hold stripped 1s before close (verified remediation) -> isBypass: false', () => {
   const events = [
     { event: 'labeled', label: { name: 'tracking-parent-hold' }, actor: { login: 'manager' }, created_at: '2026-09-20T00:00:00Z' },
     { event: 'unlabeled', label: { name: 'tracking-parent-hold' }, actor: { login: 'quineworks' }, created_at: '2026-10-02T07:03:51Z' },
@@ -50,11 +53,11 @@ test('direct agent close with hold stripped 1s before close -> isBypass: true', 
     closedAt: '2026-10-02T07:03:52Z',
     closedByLogin: 'quineworks',
   });
-  assert.equal(result.isBypass, true);
-  assert.match(result.reason, /stripped/);
+  assert.equal(result.isBypass, false);
+  assert.match(result.reason, /not present at close time/);
 });
 
-test('direct agent close, hold removed hours earlier (deliberate, separate unhold) -> isBypass: false', () => {
+test('direct agent close, hold removed hours earlier then closed -> isBypass: false', () => {
   const events = [
     { event: 'labeled', label: { name: 'tracking-parent-hold' }, actor: { login: 'manager' }, created_at: '2026-09-20T00:00:00Z' },
     { event: 'unlabeled', label: { name: 'tracking-parent-hold' }, actor: { login: 'manager' }, created_at: '2026-10-02T04:00:00Z' },
@@ -65,7 +68,7 @@ test('direct agent close, hold removed hours earlier (deliberate, separate unhol
     closedByLogin: 'manager',
   });
   assert.equal(result.isBypass, false);
-  assert.match(result.reason, /deliberate/);
+  assert.match(result.reason, /not present at close time/);
 });
 
 test('direct agent close, issue never carried the hold label -> isBypass: false', () => {
@@ -91,20 +94,5 @@ test('label/unlabel events after close time are ignored (a later re-label does n
     closedByLogin: 'manager',
   });
   assert.equal(result.isBypass, false);
-  assert.match(result.reason, /deliberate/);
-});
-
-test('custom staleWindowMs is honored (tight window turns a near-miss into "deliberate")', () => {
-  const events = [
-    { event: 'labeled', label: { name: 'tracking-parent-hold' }, actor: { login: 'manager' }, created_at: '2026-09-20T00:00:00Z' },
-    { event: 'unlabeled', label: { name: 'tracking-parent-hold' }, actor: { login: 'quineworks' }, created_at: '2026-10-02T07:00:00Z' },
-  ];
-  const result = decideBypass({
-    events,
-    closedAt: '2026-10-02T07:03:50Z',
-    closedByLogin: 'quineworks',
-    staleWindowMs: 60 * 1000,
-  });
-  assert.equal(result.isBypass, false);
-  assert.match(result.reason, /deliberate/);
+  assert.match(result.reason, /not present at close time/);
 });

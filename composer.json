@@ -16,7 +16,9 @@
         "stamp-duty",
         "import-duty",
         "tax-calculator",
-        "sdk"
+        "sdk",
+        "php-sdk",
+        "api-client"
     ],
     "support": {
         "issues": "https://github.com/quineworks/taxlane-php/issues",

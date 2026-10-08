@@ -5,7 +5,7 @@
 [![PHP Version Require](https://img.shields.io/packagist/php-v/quineworks/taxlane.svg)](composer.json)
 [![License](https://img.shields.io/packagist/l/quineworks/taxlane.svg)](LICENSE)
 
-Nigeria PAYE, VAT, CIT, CGT & 6 more tax calculators, as static PHP method
+Nigeria PAYE, VAT, CIT, CGT & 8 more tax calculators, as static PHP method
 calls — no API key, no Guzzle, no account.
 
 ```php
@@ -205,6 +205,30 @@ TaxLane::calculateStampDuty(['instrumentType' => 'tenancy', 'amount' => 12_000_0
 TaxLane::calculateImportDuty(['fob' => 5_000_000, 'freight' => 300_000, 'insurance' => 100_000, 'band' => '20'])['data'];
 // ['fob' => 5000000, 'freight' => 300000, 'insurance' => 100000, 'cif' => 5400000, 'band' => '20', 'dutyRate' => 0.2, 'duty' => 1080000, 'surcharge' => 75600, 'etls' => 27000, 'fcs' => 200000, 'vat' => 508695, 'totalLandedCost' => 7291295]
 ```
+
+### `calculateNhfContribution`
+
+```php
+TaxLane::calculateNhfContribution(['annualBasicSalary' => 3_000_000])['data'];
+// ['annualBasicSalary' => 3000000, 'annualNhfContribution' => 75000, 'monthlyNhfContribution' => 6250]
+```
+
+### `calculatePensionContribution`
+
+```php
+TaxLane::calculatePensionContribution(['annualBasicSalary' => 3_000_000, 'yearsToProject' => 10])['data'];
+// [
+//   'pensionablePay' => 3000000,
+//   'employeeContribution' => 240000,
+//   'employerContribution' => 300000,
+//   'voluntaryContribution' => 0,
+//   'totalAnnualContribution' => 540000,
+//   'projection' => [['year' => 0, 'balance' => 0], ['year' => 1, 'balance' => 578000], ...],
+// ]
+```
+
+Only `annualBasicSalary` is required — `yearsToProject` defaults to `10`
+(clamped to 50) and every other field defaults to `0`/`0.07`.
 
 ## Response shape
 

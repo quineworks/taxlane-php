@@ -7,7 +7,7 @@ namespace TaxLane;
 /**
  * Official PHP SDK for TaxLane's free Developer API (tax-lane#1722, spec
  * docs/product/developer-api-php-sdk.md). One static method per /v1/*
- * endpoint, matching the JS/TS SDK's (sdk/) 11 function names 1:1 in
+ * endpoint, matching the JS/TS SDK's (sdk/) 13 function names 1:1 in
  * camelCase form -- see README.md for a quickstart per endpoint.
  *
  * A static facade rather than an instantiated client is the deliberate
@@ -234,6 +234,45 @@ final class TaxLane
     public static function calculateImportDuty(array $input, ?string $baseUrl = null): array
     {
         return self::post('/v1/import-duty', $input, $baseUrl);
+    }
+
+    /**
+     * Calculates the employee NHF (National Housing Fund) contribution
+     * exactly the way POST /v1/nhf-contribution does. `annualBasicSalary`
+     * is the only field.
+     *
+     * @param array<string, mixed> $input `annualBasicSalary`.
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `annualBasicSalary`, `annualNhfContribution`,
+     *     `monthlyNhfContribution`.
+     * @throws TaxLaneApiException on a non-200 response.
+     */
+    public static function calculateNhfContribution(array $input, ?string $baseUrl = null): array
+    {
+        return self::post('/v1/nhf-contribution', $input, $baseUrl);
+    }
+
+    /**
+     * Calculates pension (RSA) contributions and a balance projection
+     * exactly the way POST /v1/pension-contribution does. Only
+     * `annualBasicSalary` is required -- every other field defaults as
+     * documented below.
+     *
+     * @param array<string, mixed> $input `annualBasicSalary`,
+     *     `annualHousingAllowance`, `annualTransportAllowance`,
+     *     `voluntaryContribution`, `currentRsaBalance`, `yearsToProject`
+     *     (defaults to 10, clamped to 50), `assumedAnnualGrowthRate`
+     *     (defaults to 0.07).
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `pensionablePay`, `employeeContribution`,
+     *     `employerContribution`, `voluntaryContribution`,
+     *     `totalAnnualContribution`, and `projection` (an array of
+     *     `{year, balance}`).
+     * @throws TaxLaneApiException on a non-200 response.
+     */
+    public static function calculatePensionContribution(array $input, ?string $baseUrl = null): array
+    {
+        return self::post('/v1/pension-contribution', $input, $baseUrl);
     }
 
     /**

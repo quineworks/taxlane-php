@@ -1,6 +1,6 @@
 {
     "name": "quineworks/taxlane",
-    "description": "Official PHP SDK for TaxLane's free Nigeria tax calculator API (PAYE, VAT, WHT, CIT, CGT & 6 more).",
+    "description": "Official PHP SDK for TaxLane's free Nigeria tax calculator API (PAYE, VAT, WHT, CIT, CGT & 8 more).",
     "type": "library",
     "license": "MIT",
     "homepage": "https://taxlane.ng/developers",

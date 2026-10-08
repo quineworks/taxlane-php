@@ -19,7 +19,7 @@ final class TaxLaneTest extends TestCase
     /**
      * One row per DEVELOPER_API_TOC endpoint (web/src/lib/content/
      * developersContent.tsx), matching the JS/Python SDKs' own endpoint
-     * table -- deliberately 11, no more no less, since PHP's
+     * table -- deliberately 13, no more no less, since PHP's
      * associative-array-pass-through design (docs/product/
      * developer-api-php-sdk.md) needs no per-endpoint field-mapping
      * verification the way the Python SDK's kwarg-mapping table does.
@@ -76,6 +76,16 @@ final class TaxLaneTest extends TestCase
                 'calculateImportDuty',
                 '/v1/import-duty',
                 ['fob' => 5_000_000, 'freight' => 300_000, 'insurance' => 100_000, 'band' => '20'],
+            ],
+            'calculateNhfContribution' => [
+                'calculateNhfContribution',
+                '/v1/nhf-contribution',
+                ['annualBasicSalary' => 3_000_000],
+            ],
+            'calculatePensionContribution' => [
+                'calculatePensionContribution',
+                '/v1/pension-contribution',
+                ['annualBasicSalary' => 3_000_000, 'yearsToProject' => 10],
             ],
         ];
     }
@@ -201,7 +211,7 @@ final class TaxLaneTest extends TestCase
         TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000]);
     }
 
-    public function testExportsExactlyTheElevenMethodsMatchingTheJsSdkOneToOne(): void
+    public function testExportsExactlyTheThirteenMethodsMatchingTheJsSdkOneToOne(): void
     {
         $expected = [
             'calculatePaye',
@@ -215,6 +225,8 @@ final class TaxLaneTest extends TestCase
             'calculateCgt',
             'calculateStampDuty',
             'calculateImportDuty',
+            'calculateNhfContribution',
+            'calculatePensionContribution',
         ];
 
         $methods = array_values(array_filter(
@@ -222,7 +234,7 @@ final class TaxLaneTest extends TestCase
             static fn(string $name): bool => str_starts_with($name, 'calculate'),
         ));
 
-        $this->assertCount(11, $methods);
+        $this->assertCount(13, $methods);
         $this->assertSame($expected, $methods);
     }
 }

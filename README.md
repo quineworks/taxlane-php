@@ -5,8 +5,8 @@
 [![PHP Version Require](https://img.shields.io/packagist/php-v/quineworks/taxlane.svg)](composer.json)
 [![License](https://img.shields.io/packagist/l/quineworks/taxlane.svg)](LICENSE)
 
-Nigeria PAYE, VAT, CIT, CGT & 8 more tax calculators, as static PHP method
-calls — no API key, no Guzzle, no account.
+Nigeria PAYE, VAT, WHT, CIT, CGT & 8 more tax calculators, as static PHP
+method calls — no API key, no Guzzle, no account.
 
 ```php
 use TaxLane\TaxLane;

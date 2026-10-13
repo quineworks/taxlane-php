@@ -18,7 +18,9 @@
         "tax-calculator",
         "sdk",
         "php-sdk",
-        "api-client"
+        "api-client",
+        "nhf",
+        "pension"
     ],
     "support": {
         "issues": "https://github.com/quineworks/taxlane-php/issues",

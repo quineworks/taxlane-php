@@ -1,0 +1,9 @@
+# scripts/*.cjs and scripts/*.py are governance/CI helper scripts synced
+# byte-identical from quineworks/platform (never hand-authored in this
+# repo) and outweigh the actual PHP SDK (src/, tests/) by byte count,
+# which makes GitHub's linguist report this repo's -- and Packagist's --
+# primary language as JavaScript instead of PHP. Excluding them from
+# language-detection stats lets both show PHP, matching what PHP
+# developers filtering by language are actually looking for.
+scripts/*.cjs linguist-generated=true
+scripts/*.py linguist-generated=true

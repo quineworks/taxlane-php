@@ -72,6 +72,22 @@ try {
 
 ## Endpoints
 
+| Method | Calculates |
+|---|---|
+| [`calculatePaye`](#calculatepaye) | PAYE on an employee's gross annual income |
+| [`calculatePayrollBatch`](#calculatepayrollbatch) | PAYE for up to 1,000 employees in one call |
+| [`calculateVat`](#calculatevat) | VAT on an amount, inclusive or exclusive |
+| [`calculatePresumptive`](#calculatepresumptive) | Presumptive tax on turnover |
+| [`calculateDirectAssessment`](#calculatedirectassessment) | Direct Assessment tax on turnover + expenses |
+| [`calculateCit`](#calculatecit) | Companies Income Tax eligibility + liability |
+| [`calculateWht`](#calculatewht) | Withholding tax on a transaction |
+| [`calculateEmployerCost`](#calculateemployercost) | Full employer cost of a salary package |
+| [`calculateCgt`](#calculatecgt) | Capital Gains Tax on a disposal |
+| [`calculateStampDuty`](#calculatestampduty) | Stamp duty on an instrument |
+| [`calculateImportDuty`](#calculateimportduty) | Import duty + landed cost on a shipment |
+| [`calculateNhfContribution`](#calculatenhfcontribution) | NHF contribution on basic salary |
+| [`calculatePensionContribution`](#calculatepensioncontribution) | Pension contribution + balance projection |
+
 ### `calculatePaye`
 
 ```php

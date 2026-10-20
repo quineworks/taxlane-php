@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Candidate B — endpoints-at-a-glance index table</title>
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<article class="markdown-body">
+  <div class="preview-note">Preview only — approximates GitHub's markdown rendering for layout review. Full endpoint bodies abbreviated below with a note; see the PR description for the actual README.md diff.</div>
+
+  <h1>quineworks/taxlane</h1>
+  <div class="badges">
+    <span class="badge" style="background:#007ec6">packagist v1.4.0</span>
+    <span class="badge" style="background:#4c1">downloads 12k</span>
+    <span class="badge" style="background:#007ec6">php ^8.0</span>
+    <span class="badge" style="background:#9f9f9f">license MIT</span>
+  </div>
+  <p>Nigeria PAYE, VAT, WHT, CIT, CGT &amp; 8 more tax calculators, as static PHP
+  method calls — no API key, no Guzzle, no account.</p>
+  <pre><code>use TaxLane\TaxLane;
+
+TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000])['data'];
+// ['taxableIncome' => 6000000, 'payeTax' => 870000, 'monthlyTax' => 72500, ...]</code></pre>
+
+  <h2 id="install">Install</h2>
+  <pre><code>composer require quineworks/taxlane</code></pre>
+
+  <h2 id="quickstart">Quickstart</h2>
+  <pre><code>$response = TaxLane::calculatePaye([
+    'grossAnnualIncome' => 6_000_000,
+    'annualRentPaid' => 1_200_000,
+]);
+$response['data'];
+$response['rateLimit'];</code></pre>
+
+  <h2 id="endpoints">Endpoints</h2>
+  <table>
+    <thead>
+      <tr><th>Method</th><th>Calculates</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><a href="#calculatepaye"><code>calculatePaye</code></a></td><td>PAYE on an employee's gross annual income</td></tr>
+      <tr><td><a href="#calculatepayrollbatch"><code>calculatePayrollBatch</code></a></td><td>PAYE for up to 1,000 employees in one call</td></tr>
+      <tr><td><a href="#calculatevat"><code>calculateVat</code></a></td><td>VAT on an amount, inclusive or exclusive</td></tr>
+      <tr><td><a href="#calculatepresumptive"><code>calculatePresumptive</code></a></td><td>Presumptive tax on turnover</td></tr>
+      <tr><td><a href="#calculatedirectassessment"><code>calculateDirectAssessment</code></a></td><td>Direct Assessment tax on turnover + expenses</td></tr>
+      <tr><td><a href="#calculatecit"><code>calculateCit</code></a></td><td>Companies Income Tax eligibility + liability</td></tr>
+      <tr><td><a href="#calculatewht"><code>calculateWht</code></a></td><td>Withholding tax on a transaction</td></tr>
+      <tr><td><a href="#calculateemployercost"><code>calculateEmployerCost</code></a></td><td>Full employer cost of a salary package</td></tr>
+      <tr><td><a href="#calculatecgt"><code>calculateCgt</code></a></td><td>Capital Gains Tax on a disposal</td></tr>
+      <tr><td><a href="#calculatestampduty"><code>calculateStampDuty</code></a></td><td>Stamp duty on an instrument</td></tr>
+      <tr><td><a href="#calculateimportduty"><code>calculateImportDuty</code></a></td><td>Import duty + landed cost on a shipment</td></tr>
+      <tr><td><a href="#calculatenhfcontribution"><code>calculateNhfContribution</code></a></td><td>NHF contribution on basic salary</td></tr>
+      <tr><td><a href="#calculatepensioncontribution"><code>calculatePensionContribution</code></a></td><td>Pension contribution + balance projection</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="calculatepaye"><code>calculatePaye</code></h3>
+  <pre><code>TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000])['data'];
+// ['taxableIncome' => 6000000, 'payeTax' => 870000, ...]</code></pre>
+
+  <h3 id="calculatepayrollbatch"><code>calculatePayrollBatch</code></h3>
+  <pre><code>TaxLane::calculatePayrollBatch(['employees' => [...]])['data'];</code></pre>
+
+  <div class="ellipsis-note">⋯ 10 more endpoint sections, unchanged, continue exactly as today ⋯</div>
+
+  <h3 id="calculatepensioncontribution"><code>calculatePensionContribution</code></h3>
+  <pre><code>TaxLane::calculatePensionContribution(['annualBasicSalary' => 3_000_000])['data'];</code></pre>
+
+  <h2 id="response-shape">Response shape</h2>
+  <p>Every method returns <code>['data' => ..., 'rateLimit' => ...]</code>, a plain associative array.</p>
+  <h2 id="errors">Errors</h2>
+  <p>Throws <code>TaxLane\TaxLaneApiException</code> on a non-200 response.</p>
+  <h2 id="rate-limits">Rate limits</h2>
+  <p>Parsed from <code>X-RateLimit-*</code> headers on every response.</p>
+  <h2 id="limits">Limits</h2>
+  <p>No API key, no daily cap — 50 req/s shared Gateway ceiling.</p>
+  <h2 id="distribution">Distribution</h2>
+  <p>Published to Packagist as <code>quineworks/taxlane</code>.</p>
+  <h2 id="license">License</h2>
+  <p>MIT — see <code>LICENSE</code>.</p>
+</article>
+</body>
+</html>

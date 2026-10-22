@@ -23,6 +23,10 @@ final class TaxLaneTest extends TestCase
      * associative-array-pass-through design (docs/product/
      * developer-api-php-sdk.md) needs no per-endpoint field-mapping
      * verification the way the Python SDK's kwarg-mapping table does.
+     * `calculateCapitalAllowances` is exercised separately below: unlike
+     * every other method here, it flattens its nested `capitalAllowances`
+     * input before posting rather than passing `$input` straight through,
+     * so it doesn't fit this table's pass-through-unmodified assertion.
      *
      * @return array<string, array{0: string, 1: string, 2: array<string, mixed>}>
      */
@@ -211,7 +215,7 @@ final class TaxLaneTest extends TestCase
         TaxLane::calculatePaye(['grossAnnualIncome' => 6_000_000]);
     }
 
-    public function testExportsExactlyTheThirteenMethodsMatchingTheJsSdkOneToOne(): void
+    public function testExportsExactlyTheFourteenMethodsMatchingTheJsSdkOneToOne(): void
     {
         $expected = [
             'calculatePaye',
@@ -227,6 +231,7 @@ final class TaxLaneTest extends TestCase
             'calculateImportDuty',
             'calculateNhfContribution',
             'calculatePensionContribution',
+            'calculateCapitalAllowances',
         ];
 
         $methods = array_values(array_filter(
@@ -234,7 +239,56 @@ final class TaxLaneTest extends TestCase
             static fn(string $name): bool => str_starts_with($name, 'calculate'),
         ));
 
-        $this->assertCount(13, $methods);
+        $this->assertCount(14, $methods);
         $this->assertSame($expected, $methods);
+    }
+
+    public function testCalculateCapitalAllowancesFlattensTheNestedInputToTheNineWireFields(): void
+    {
+        CurlStub::respond(200, '{}');
+
+        TaxLane::calculateCapitalAllowances([
+            'assessableProfit' => 20_000_000,
+            'broughtForwardLossRelief' => 3_000_000,
+            'capitalAllowances' => [
+                'rate10' => ['qualifyingExpenditure' => 10_000_000],
+                'rate25' => ['qualifyingExpenditure' => 6_000_000],
+            ],
+        ]);
+
+        $this->assertSame([
+            'assessableProfit' => 20_000_000,
+            'broughtForwardLossRelief' => 3_000_000,
+            'broughtForwardUnclaimedCapitalAllowance' => 0,
+            'rate10QualifyingExpenditure' => 10_000_000,
+            'rate10BroughtForwardWrittenDownValue' => 0,
+            'rate20QualifyingExpenditure' => 0,
+            'rate20BroughtForwardWrittenDownValue' => 0,
+            'rate25QualifyingExpenditure' => 6_000_000,
+            'rate25BroughtForwardWrittenDownValue' => 0,
+        ], json_decode(CurlStub::request()['body'], true));
+    }
+
+    public function testCalculateCapitalAllowancesPostsToTheCapitalAllowancesPath(): void
+    {
+        CurlStub::respond(200, '{"taxableProfit": 14500000}');
+
+        $response = TaxLane::calculateCapitalAllowances(['assessableProfit' => 20_000_000]);
+
+        $this->assertSame(TaxLane::API_BASE_URL . '/v1/capital-allowances', CurlStub::request()['url']);
+        $this->assertSame(['taxableProfit' => 14_500_000], $response['data']);
+    }
+
+    public function testCalculateCapitalAllowancesThrowsTaxLaneApiExceptionOnA400Response(): void
+    {
+        CurlStub::respond(400, json_encode(['error' => 'assessableProfit is required and must be a number']));
+
+        try {
+            TaxLane::calculateCapitalAllowances([]);
+            $this->fail('Expected TaxLaneApiException to be thrown.');
+        } catch (TaxLaneApiException $exception) {
+            $this->assertSame('assessableProfit is required and must be a number', $exception->getMessage());
+            $this->assertSame(400, $exception->getCode());
+        }
     }
 }

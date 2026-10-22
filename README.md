@@ -5,7 +5,7 @@
 [![PHP Version Require](https://img.shields.io/packagist/php-v/quineworks/taxlane.svg)](composer.json)
 [![License](https://img.shields.io/packagist/l/quineworks/taxlane.svg)](LICENSE)
 
-Nigeria PAYE, VAT, WHT, CIT, CGT & 8 more tax calculators, as static PHP
+Nigeria PAYE, VAT, WHT, CIT, CGT & 9 more tax calculators, as static PHP
 method calls — no API key, no Guzzle, no account.
 
 ```php
@@ -87,6 +87,7 @@ try {
 | [`calculateImportDuty`](#calculateimportduty) | Import duty + landed cost on a shipment |
 | [`calculateNhfContribution`](#calculatenhfcontribution) | NHF contribution on basic salary |
 | [`calculatePensionContribution`](#calculatepensioncontribution) | Pension contribution + balance projection |
+| [`calculateCapitalAllowances`](#calculatecapitalallowances) | Taxable profit from assessable profit, capital allowances & loss relief |
 
 ### `calculatePaye`
 
@@ -245,6 +246,32 @@ TaxLane::calculatePensionContribution(['annualBasicSalary' => 3_000_000, 'yearsT
 
 Only `annualBasicSalary` is required — `yearsToProject` defaults to `10`
 (clamped to 50) and every other field defaults to `0`/`0.07`.
+
+### `calculateCapitalAllowances`
+
+```php
+TaxLane::calculateCapitalAllowances([
+    'assessableProfit' => 20_000_000,
+    'broughtForwardLossRelief' => 3_000_000,
+    'capitalAllowances' => [
+        'rate10' => ['qualifyingExpenditure' => 10_000_000],
+        'rate25' => ['qualifyingExpenditure' => 6_000_000],
+    ],
+])['data'];
+// [
+//   'assessableProfit' => 20000000,
+//   'lossReliefApplied' => 3000000,
+//   'lossReliefCarriedForward' => 0,
+//   'capitalAllowanceApplied' => 2500000,
+//   'capitalAllowanceCarriedForward' => 0,
+//   'taxableProfit' => 14500000,
+// ]
+```
+
+Only `assessableProfit` is required. Unlike every other method above, this
+one takes a nested `capitalAllowances` array (keyed `rate10`/`rate20`/
+`rate25`) and flattens it to the API's nine flat wire fields internally,
+since `POST /v1/capital-allowances` has never accepted a nested body.
 
 ## Response shape
 

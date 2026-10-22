@@ -276,6 +276,50 @@ final class TaxLane
     }
 
     /**
+     * Derives taxable profit from assessable profit exactly the way POST
+     * /v1/capital-allowances does. Only `assessableProfit` is required --
+     * every other field, including each rate class's sub-fields, defaults
+     * to 0.
+     *
+     * Takes the same nested `capitalAllowances` shape the underlying
+     * calculator uses (keyed `rate10`/`rate20`/`rate25`, each with
+     * `qualifyingExpenditure`/`broughtForwardWrittenDownValue`) and flattens
+     * it to the API's nine flat wire fields internally -- the API has never
+     * accepted a nested request body.
+     *
+     * @param array{
+     *     assessableProfit: int|float,
+     *     broughtForwardLossRelief?: int|float,
+     *     broughtForwardUnclaimedCapitalAllowance?: int|float,
+     *     capitalAllowances?: array<string, array{qualifyingExpenditure?: int|float, broughtForwardWrittenDownValue?: int|float}>
+     * } $input
+     * @return array{data: array<string, mixed>, rateLimit: array{limit: int, remaining: int, reset: int}}
+     *     `data` has `assessableProfit`, `lossReliefApplied`,
+     *     `lossReliefCarriedForward`, `capitalAllowanceApplied`,
+     *     `capitalAllowanceCarriedForward`, `taxableProfit`.
+     * @throws TaxLaneApiException on a non-200 response.
+     */
+    public static function calculateCapitalAllowances(array $input, ?string $baseUrl = null): array
+    {
+        $rateClasses = $input['capitalAllowances'] ?? [];
+        $body = [
+            // No `?? 0` default here, unlike every other field below --
+            // `assessableProfit` is the one required field, so a missing key
+            // must reach the API as `null` and get its own 400, not silently
+            // become 0 client-side.
+            'assessableProfit' => $input['assessableProfit'] ?? null,
+            'broughtForwardLossRelief' => $input['broughtForwardLossRelief'] ?? 0,
+            'broughtForwardUnclaimedCapitalAllowance' => $input['broughtForwardUnclaimedCapitalAllowance'] ?? 0,
+        ];
+        foreach (['rate10', 'rate20', 'rate25'] as $rateClass) {
+            $body["{$rateClass}QualifyingExpenditure"] = $rateClasses[$rateClass]['qualifyingExpenditure'] ?? 0;
+            $body["{$rateClass}BroughtForwardWrittenDownValue"] =
+                $rateClasses[$rateClass]['broughtForwardWrittenDownValue'] ?? 0;
+        }
+        return self::post('/v1/capital-allowances', $body, $baseUrl);
+    }
+
+    /**
      * No retries/timeout/auth -- the API has none of those to work around
      * (see the spec's "Explicit non-goals"). A network/DNS failure throws
      * curl's own error, uncaught here, rather than being swallowed or

@@ -16,7 +16,7 @@
     <span class="badge" style="background:#007ec6">php ^8.0</span>
     <span class="badge" style="background:#9f9f9f">license MIT</span>
   </div>
-  <p>Nigeria PAYE, VAT, WHT, CIT, CGT &amp; 8 more tax calculators, as static PHP
+  <p>Nigeria PAYE, VAT, WHT, CIT, CGT &amp; 9 more tax calculators, as static PHP
   method calls — no API key, no Guzzle, no account.</p>
   <pre><code>use TaxLane\TaxLane;
 
@@ -53,6 +53,7 @@ $response['rateLimit'];</code></pre>
       <tr><td><a href="#calculateimportduty"><code>calculateImportDuty</code></a></td><td>Import duty + landed cost on a shipment</td></tr>
       <tr><td><a href="#calculatenhfcontribution"><code>calculateNhfContribution</code></a></td><td>NHF contribution on basic salary</td></tr>
       <tr><td><a href="#calculatepensioncontribution"><code>calculatePensionContribution</code></a></td><td>Pension contribution + balance projection</td></tr>
+      <tr><td><a href="#calculatecapitalallowances"><code>calculateCapitalAllowances</code></a></td><td>Taxable profit from assessable profit, capital allowances &amp; loss relief</td></tr>
     </tbody>
   </table>
 
@@ -63,7 +64,7 @@ $response['rateLimit'];</code></pre>
   <h3 id="calculatepayrollbatch"><code>calculatePayrollBatch</code></h3>
   <pre><code>TaxLane::calculatePayrollBatch(['employees' => [...]])['data'];</code></pre>
 
-  <div class="ellipsis-note">⋯ 10 more endpoint sections, unchanged, continue exactly as today ⋯</div>
+  <div class="ellipsis-note">⋯ 11 more endpoint sections, unchanged, continue exactly as today ⋯</div>
 
   <h3 id="calculatepensioncontribution"><code>calculatePensionContribution</code></h3>
   <pre><code>TaxLane::calculatePensionContribution(['annualBasicSalary' => 3_000_000])['data'];</code></pre>

@@ -15,8 +15,8 @@ each `.html` file directly or view the matching PNG under `screenshots/`.
 
 ## Gap
 
-`README.md` is 298 lines with 13 near-identical `### calculate*` endpoint
-sections back to back (lines 73-231) and no way to jump to one — a reader
+`README.md` is 341 lines with 14 near-identical `### calculate*` endpoint
+sections back to back (lines 73-275) and no way to jump to one — a reader
 who wants `calculateCgt` has to scroll past PAYE, VAT, Presumptive, Direct
 Assessment and CIT first, every time.
 
@@ -27,7 +27,7 @@ drafting these (`stripe/stripe-php`, `twilio/twilio-php`,
 `laravel/scout`, `thephpleague/csv`, `firebase/php-jwt`) — **none use an
 in-README table of contents**, so this isn't "everyone else has a ToC and
 we don't." What they do instead is keep the README short (19-324 lines,
-median well under 298) by linking out to a hosted docs site for the full
+median well under 341) by linking out to a hosted docs site for the full
 per-endpoint reference rather than inlining every example — e.g.
 `respect/validation`'s README is 19 lines and points straight to its docs
 site; Stripe and Twilio document only a handful of illustrative calls, not
@@ -40,7 +40,7 @@ account," every example runnable by copy-paste with no docs site required
 differentiator worth keeping, not a mistake to fix by trimming examples
 down to Stripe/Twilio's size. Given the README stays long by design, the
 actual gap is narrower than "match a convention nobody else uses": once a
-reference doc is ~300 lines with 13 repeated sections, GitHub's own
+reference doc is ~340 lines with 14 repeated sections, GitHub's own
 markdown renders `<details>` collapse and anchor links natively regardless
 of whether other packages use them, and this repo's own prior design pass
 (`#5`/PR#5) already set precedent for a navigable README landing page.
@@ -73,14 +73,14 @@ Previews approximate GitHub's rendered-markdown styling by hand (no network
 access in this run to fetch GitHub's actual stylesheet or render through
 GitHub itself) — close enough to judge layout and scanability, not a
 pixel-perfect GitHub render. Each preview shows the real intro/Install/
-Quickstart content unchanged, the real Endpoints heading, 2-3 real endpoint
+Quickstart content unchanged, the real Endpoints heading, 3-4 real endpoint
 bodies in full, and an explicit "N more … continue exactly as today" note
-standing in for the other 10 (unchanged) — a full real-content diff is a
+standing in for the rest (unchanged) — a full real-content diff is a
 plain-text README edit, not a rendering concern, and is shown in the paired
 PR description.
 
 - **A — linked table of contents**: a `## Contents` block right after the
-  intro, linking every top-level section plus all 13 endpoint methods as a
+  intro, linking every top-level section plus all 14 endpoint methods as a
   nested list. Smallest change, most familiar GitHub pattern, zero new
   content to maintain beyond the links themselves.
 - **B — endpoints-at-a-glance index table** (shipped): a two-column table
@@ -91,11 +91,11 @@ PR description.
   common in API-client READMEs. Needs a one-line description written per
   method (shown in the preview) and kept in sync if an endpoint is ever
   added — a small, bounded maintenance cost.
-- **C — collapsible per-endpoint sections**: each of the 13 endpoint
+- **C — collapsible per-endpoint sections**: each of the 14 endpoint
   bodies wrapped in a native GitHub `<details><summary>` block, collapsed
   by default, with the one-line description in the summary row itself.
   Shortens the page dramatically at a glance (the reference collapses to
-  13 one-line rows instead of ~160 lines of code blocks) at the cost of an
+  14 one-line rows instead of ~185 lines of code blocks) at the cost of an
   extra click to see any one endpoint's body, and depends on GitHub's
   (confirmed, already used elsewhere at Quine Works) `<details>` markdown
   support rather than plain links.

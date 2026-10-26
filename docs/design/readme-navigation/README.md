@@ -1,5 +1,13 @@
 # README navigation candidates
 
+**Resolved — Candidate B shipped.** `tax-lane#3041` landed Candidate B
+(the endpoints-at-a-glance index table) in `sdk-php/README.md`, synced here
+in `025622d` ("sdk-php: add endpoints-at-a-glance index table to README
+(#3041)"). This repo's live `README.md` `## Endpoints` section is
+byte-for-byte that candidate. The three candidates below are kept as the
+historical record of what was considered, not an open choice — don't
+re-propose a second navigation scheme on top of the one already shipped.
+
 Three candidates for navigating this repo's `README.md` — the package's
 landing page on both GitHub and Packagist (Packagist mirrors a package's
 README verbatim) — see the paired issue for the gap this addresses. Open
@@ -53,12 +61,13 @@ requires an interactive terminal` — a known, already-tracked gap per
 **Important constraint, confirmed from `README.md`'s own "Distribution"
 section**: *"This README's source of truth is `quineworks/tax-lane`'s
 `sdk-php/` directory ... Don't edit this copy directly — the next sync will
-overwrite it."* This run is scoped to `quineworks/taxlane-php` only, so
-these are candidates only — landing one for real needs a follow-up
-engineering ticket against `quineworks/tax-lane`'s `sdk-php/README.md`
-(same two-step pattern PR#5 used: `tax-lane#1982` landed Candidate C from
-this repo's prior README-header pass). Not filed here, out of scope for
-this run.
+overwrite it."* This run was scoped to `quineworks/taxlane-php` only, so
+these were candidates only at the time — landing one for real needed a
+follow-up engineering ticket against `quineworks/tax-lane`'s
+`sdk-php/README.md` (same two-step pattern PR#5 used: `tax-lane#1982`
+landed Candidate C from this repo's prior README-header pass). That
+follow-up has since happened: `tax-lane#3041` landed Candidate B and it's
+now live (see the note at the top of this file).
 
 Previews approximate GitHub's rendered-markdown styling by hand (no network
 access in this run to fetch GitHub's actual stylesheet or render through
@@ -74,7 +83,7 @@ PR description.
   intro, linking every top-level section plus all 13 endpoint methods as a
   nested list. Smallest change, most familiar GitHub pattern, zero new
   content to maintain beyond the links themselves.
-- **B — endpoints-at-a-glance index table**: a two-column table
+- **B — endpoints-at-a-glance index table** (shipped): a two-column table
   (`Method` / `Calculates`) right at the top of `## Endpoints`, each method
   name linking down to its full section; no separate top-of-file ToC for
   the other 6 non-endpoint sections (they're short enough to reach by
